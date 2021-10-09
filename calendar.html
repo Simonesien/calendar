@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de">
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style type="text/css">
+      #event{color:green;}
+      #feiertag{color:red;}
+      #jetzt{color:yellow;font-weight:bold;}
+      </style>
+      <script type="text/javascript">
+      let events = ["22.1.2022|Rap Mayhem Festival, München", "1.2.2022|Spirit Of Goa, Hamburg", "16.2.2022|Emergenza Acoustic Festival, Berlin", "2.3.2022|Skarneval Koblenz, Wehdem", "12.4.2022|Balinger Rockfestival, Dillingen", "5.7.2022|HipHop Open, Stuttgart", "19.7.2022|Feeling Fine Festival, Espelkamp", "26.7.2022|Beach Party, Duisburg"];
+      let holidays = ["1.1", "6.1", "1.5", "3.10", "1.11", "25.12", "26.12", "31.12"];
+      function putDate(n, modus)
+      {
+         var d = new Date(date_memory.split(',')[0],date_memory.split(',')[1],date_memory.split(',')[2]);
+         d.setDate(n);   
+         if (modus == 0)
+            {document.getElementById('output').innerHTML = d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear();}
+         else {
+            document.getElementById('output').innerHTML = getEventtext( d.getFullYear(), d.getMonth(), d.getDate());
+         }
+      }
+
+      function changeMonth(next)
+      {
+         var d = new Date(date_memory.split(',')[0],date_memory.split(',')[1],date_memory.split(',')[2]);
+         var m = d.getMonth()+1;
+         var y = d.getFullYear();
+         if (next) {
+            if ((m+1)>12){
+            m = 0;
+            y = y + 1;
+            }
+         }
+         else { 
+            if ((m-1)<1){
+            m = 11;
+            y = y - 1;
+            }
+            else {
+               m = m - 2;
+            }
+         }
+         var d = new Date(y,m,01);
+         date_memory = d.getFullYear()+','+d.getMonth()+','+d.getDate();
+         loadcalendar();
+      }
+      
+      function loadcalendar() 
+      {
+         var d = new Date(date_memory.split(',')[0],date_memory.split(',')[1],date_memory.split(',')[2]);
+         var m = d.getMonth(); 
+         var y = d.getFullYear();
+         var firstD = d;
+         firstD.setDate(1);
+         var dateDay = firstD.getDay();
+         dateDay = (dateDay == 0) ? 7: dateDay;
+         var hD = new Date();
+         let inhalt = "";
+         for (var i = 1; i <= 42; i++)
+         {
+            zahl = (i+1)-dateDay;
+            row = i / 7 + 2;
+            if (row % 1 != 0){row = row + 1 >> 0;}
+            column = i % 7;
+            if (column == 0){column = 7;}
+            var dx = new Date(y,m,zahl);
+            let id = "";
+            let modus = "0";
+            var thisDate = new Date(y,m,1);
+            thisDate.setMonth(thisDate.getMonth()+1);
+            thisDate.setTime(thisDate.getTime() - 12*3600*1000);
+            if (i >= dateDay && !(zahl > thisDate.getDate())) 
+            {
+               if (getEventtext(y,m,zahl)) {
+                  id = 'event';
+                  modus = "1";
+               }
+               else if (isHoliday(m,zahl)){
+                  id = 'feiertag';
+               }
+               if (hD.getDate() == dx.getDate() && hD.getMonth() == dx.getMonth() && hD.getYear() == dx.getYear()){
+            id = 'jetzt';
+               }
+               if (id != ''){
+      	 	if (id == 'event'){
+      			inhalt = inhalt+'<span onclick="putDate('+zahl+', '+modus+')" style="grid-column:'+column+';grid-row:'+row+';" id="'+id+'" title="'+getEventtext(y,m,zahl)+'">'+zahl+'</span>';
+      		}
+      		 else {inhalt = inhalt+'<span onclick="putDate('+zahl+', '+modus+')" style="grid-column:'+column+';grid-row:'+row+';" id="'+id+'">'+zahl+'</span>';}
+      	 }
+               else {
+      		 inhalt = inhalt+'<span onclick="putDate('+zahl+', '+modus+')" style="grid-column:'+column+';grid-row:'+row+';">'+zahl+'</span>';}
+            }
+         }
+         inhalt = '<span style="grid-column:1;" onclick="changeMonth(0)">&laquo;</span><span style="grid-column:2 / 7;" colspan=5 id="calendar_month"></span><span style="grid-column:7;" onclick="changeMonth(1)">&raquo;</span><span style="grid-column:1;">Mo</span><span style="grid-column:2;">Di</span><span style="grid-column:3;">Mi</span><span style="grid-column:4;">Do</span><span style="grid-column:5;">Fr</span><span style="grid-column:6;">Sa</span><span style="grid-column:7;">So</span>'+inhalt;
+         container = document.getElementById('container');
+         container.innerHTML = inhalt;
+         let monthlist = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+         document.all.calendar_month.innerHTML = monthlist[m] + ' ' + y;
+      }
+      
+      function getEventtext(y,m,d)
+      {
+         for ( var i = 0; i < events.length; i++) {
+            eH = events[i].split("|");
+            dH = eH[0].split(".");
+            if (parseInt(dH[0]) == d && parseInt(dH[1]) == m + 1 && parseInt(dH[2]) == y) {
+               return eH[0]+': '+eH[1];
+            }
+         }
+         return false;
+      }
+
+      function isHoliday(m,d)
+      {
+         for ( var i = 0; i < holidays.length; i++) {
+            iH = holidays[i].split(".");
+            if (iH[0] == d && iH[1] == m + 1) {
+               return true;
+            }
+         }
+         return false;
+      }
+      </script>
+      <title>Calendar</title>
+   </head>
+   <body onload="var d = new Date();date_memory = d.getFullYear()+','+d.getMonth()+','+d.getDate();loadcalendar();">
+      <span style="display:grid;grid-template-columns: repeat(7, 40px);grid-template-rows: repeat(8, 20px);justify-items:center;" id="container"></span>
+      <span id="output"></span>
+      <br><span style="color:green;">Events</span> sind höher priorisiert als <span style="color:red;">Feiertage</span>. Die Farbe <span style="color:yellow;font-weight:bold;">Gelb</span> zeigt den heutigen Tag.
+   </body>
+</html>
+
+
